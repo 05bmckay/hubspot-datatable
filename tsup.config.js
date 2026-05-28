@@ -6,6 +6,7 @@ export default defineConfig({
     datatable: "src/datatable.js",
     form: "src/form.js",
     kanban: "src/kanban.js",
+    feed: "src/feed.js",
     "common-components": "src/common-components/index.js",
     utils: "src/utils/index.js",
   },

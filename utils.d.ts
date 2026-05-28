@@ -1,3 +1,6 @@
+import type { ComponentType } from "react";
+import type { DataTableProps, DataTableColumn } from "./packages/datatable/index";
+
 export type AutoStatusTagVariant = "default" | "success" | "warning" | "danger" | "info";
 export type AutoTagVariant = "default" | "success" | "warning" | "error" | "info";
 
@@ -47,11 +50,106 @@ export interface StatusTagSortComparatorOptions extends AutoStatusTagOptions {
 export declare function createStatusTagSortComparator(
   options?: StatusTagSortComparatorOptions
 ): (aValue: unknown, bValue: unknown) => number;
+export declare function buildCrmSearchConfig(params?: CrmSearchParams, options?: CrmSearchConfigOptions): Record<string, unknown>;
+export declare function normalizeCrmSearchRecord<Row = Record<string, unknown>>(record: unknown, options?: CrmSearchNormalizeOptions<Row>): Row;
+export declare function normalizeCrmSearchRows<Row = Record<string, unknown>>(response: unknown, options?: CrmSearchNormalizeOptions<Row>): Row[];
+export declare function useCrmSearchDataSource<Row = Record<string, unknown>>(params?: CrmSearchParams, options?: CrmSearchConfigOptions<Row>): CrmSearchDataSource<Row>;
+export declare function crmSearchResultToOption<Row = Record<string, unknown>>(row: Row, options?: CrmSearchOptionOptions<Row>): BuiltOption;
+export declare function useCrmSearchOptions<Row = Record<string, unknown>>(params?: CrmSearchParams, options?: CrmSearchConfigOptions<Row> & CrmSearchOptionOptions<Row>): CrmSearchOptionsDataSource<Row>;
+export declare function makeCrmSearchSelectField<Field = Record<string, unknown>>(field: Field, searchOptions: { options?: BuiltOption[]; loading?: boolean; isLoading?: boolean }): Field & CrmSearchFormField;
+export declare function makeCrmSearchMultiSelectField<Field = Record<string, unknown>>(field: Field, searchOptions: { options?: BuiltOption[]; loading?: boolean; isLoading?: boolean }): Field & CrmSearchFormField;
+export declare function resolveCrmObjectType(objectType: string): string;
+export declare const CrmDataTable: ComponentType<CrmDataTableProps>;
 export interface FormatCurrencyCompactOptions extends Intl.NumberFormatOptions {
   locale?: string;
   currency?: string;
   maximumFractionDigits?: number;
   compactDisplay?: "short" | "long";
+}
+
+export interface CrmSearchParams {
+  search?: string;
+  filters?: Record<string, unknown>;
+  sort?: unknown;
+  pageLength?: number;
+  [key: string]: unknown;
+}
+
+export interface CrmSearchConfigOptions<Row = Record<string, unknown>> {
+  objectType?: string;
+  properties?: string[];
+  query?: string;
+  filterGroups?: Array<{ filters: Array<Record<string, unknown>> }>;
+  sorts?: Array<Record<string, unknown>>;
+  pageLength?: number;
+  propertyMap?: Record<string, string>;
+  filterMap?: (filters: Record<string, unknown>, params: CrmSearchParams) => Array<{ filters: Array<Record<string, unknown>> }> | undefined;
+  sortMap?: (sort: unknown, params: CrmSearchParams) => Array<Record<string, unknown>> | undefined;
+  baseConfig?: Record<string, unknown>;
+  format?: Record<string, unknown>;
+  row?: CrmSearchNormalizeOptions<Row>;
+  rowIdField?: string;
+  option?: CrmSearchOptionOptions<Row>;
+  mapResponse?: (response: unknown) => Row[];
+  totalCount?: number | ((response: unknown) => number);
+  loading?: boolean | ((response: unknown) => boolean);
+  error?: string | boolean | ((response: unknown) => string | boolean);
+}
+
+export interface CrmSearchNormalizeOptions<Row = Record<string, unknown>> {
+  idField?: string;
+  objectIdField?: string;
+  propertiesKey?: string;
+  flattenProperties?: boolean;
+  propertyValueKey?: string;
+  mapRecord?: (record: unknown) => Row;
+}
+
+export interface CrmSearchOptionOptions<Row = Record<string, unknown>> {
+  label?: string | ((row: Row) => unknown);
+  value?: string | ((row: Row) => unknown);
+  description?: string | ((row: Row) => unknown);
+  fallbackLabel?: string;
+  mapOption?: (row: Row) => BuiltOption;
+}
+
+export interface CrmSearchDataSource<Row = Record<string, unknown>> {
+  data: Row[];
+  rows: Row[];
+  response: unknown;
+  loading: boolean;
+  isLoading: boolean;
+  error: string | boolean;
+  totalCount: number;
+  rowIdField: string;
+}
+
+export interface CrmSearchOptionsDataSource<Row = Record<string, unknown>> extends CrmSearchDataSource<Row> {
+  options: BuiltOption[];
+}
+
+export interface CrmSearchFormField<Field = Record<string, unknown>> extends Record<string, unknown> {
+  type: "select" | "multiselect";
+  options: BuiltOption[];
+  loading?: boolean;
+}
+
+export interface CrmDataTableProps<Row = Record<string, unknown>> extends Omit<DataTableProps<Row>, "data" | "loading" | "error" | "columns" | "searchValue" | "onParamsChange"> {
+  objectType: "contact" | "contacts" | "company" | "companies" | "deal" | "deals" | string;
+  properties?: string[];
+  columns?: DataTableColumn<Row>[];
+  pageLength?: number;
+  serverSide?: boolean;
+  filters?: DataTableProps<Row>["filters"];
+  autoFilters?: boolean | string[] | { fields?: string[] };
+  autoFilterMaxOptions?: number;
+  filterMap?: CrmSearchConfigOptions<Row>["filterMap"];
+  propertyMap?: Record<string, string>;
+  sortMap?: CrmSearchConfigOptions<Row>["sortMap"];
+  searchFields?: string[];
+  format?: Record<string, unknown>;
+  mapRecord?: (record: unknown) => Row;
+  dataTableProps?: Partial<DataTableProps<Row>>;
 }
 
 export interface DeriveCardFieldsOptions<Row = Record<string, unknown>> {

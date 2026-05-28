@@ -57,6 +57,22 @@ export type {
   KanbanOption,
 } from "./packages/kanban/index";
 
+export { Feed } from "./packages/feed/index";
+export type {
+  FeedAction,
+  FeedActor,
+  FeedContainer,
+  FeedEmptyStateRenderContext,
+  FeedErrorStateRenderContext,
+  FeedField,
+  FeedFieldType,
+  FeedItem,
+  FeedLabels,
+  FeedLoadingStateRenderContext,
+  FeedPlacement,
+  FeedProps,
+} from "./packages/feed/index";
+
 export { FormBuilder, useFormPrefill } from "./packages/form/index";
 export type {
   FormBuilderProps,
@@ -85,7 +101,7 @@ export type {
   FieldTypePlugin,
 } from "./packages/form/index";
 
-export { AutoTag, AutoStatusTag, KeyValueList, SectionHeader } from "./common-components";
+export { AutoTag, AutoStatusTag, KeyValueList, SectionHeader, Spinner, SPINNERS, SPINNER_NAMES, gridToBraille, makeGrid } from "./common-components";
 export {
   AvatarStack,
   StyledText,
@@ -109,9 +125,19 @@ export {
   DEFAULT_SVG_FONT_WEIGHT,
 } from "./common-components";
 export {
+  buildOptions,
+  createStatusTagSortComparator,
+  CrmDataTable,
+  findOptionLabel,
+  formatCurrency,
+  formatCurrencyCompact,
+  formatDate,
+  formatDateTime,
+  formatPercentage,
   getAutoTagVariant,
   getAutoStatusTagVariant,
-  createStatusTagSortComparator,
+  resolveCrmObjectType,
+  sumBy,
 } from "./utils";
 export type {
   AutoTagOptions,
@@ -119,6 +145,10 @@ export type {
   AutoStatusTagOptions,
   AutoStatusTagVariant,
   StatusTagSortComparatorOptions,
+  CrmDataTableProps,
+  CrmSearchDataSource,
+  CrmSearchConfigOptions,
+  CrmSearchParams,
 } from "./utils";
 export type {
   AutoTagProps,
@@ -127,11 +157,15 @@ export type {
   AvatarStackItem,
   AvatarStackItemObject,
   AvatarStackProps,
+  CrmLookupSelectProps,
   DateDirectionLabels,
   DatePresetOption,
   KeyValueListItem,
   KeyValueListProps,
   SectionHeaderProps,
+  SpinnerName,
+  SpinnerPreset,
+  SpinnerProps,
   StyledTextBackground,
   StyledTextDataUriOptions,
   StyledTextDataUriResult,

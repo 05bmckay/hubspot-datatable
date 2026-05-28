@@ -5,7 +5,16 @@ dist
 **/.claude/settings.local.json
 .claude/projects
 **/.claude/projects
+# Local agent instructions / scratchpads
 AGENTS.md
 **/AGENTS.md
 AGENT.md
 **/AGENT.md
+agents/
+.agents/
+
+# Private planning / release notes / marketing drafts
+RELEASING.md
+ROADMAP.md
+release.md
+marketing/

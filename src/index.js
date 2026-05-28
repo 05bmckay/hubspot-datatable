@@ -2,10 +2,12 @@ export { DataTable } from "../packages/datatable/src/DataTable.jsx";
 export { FormBuilder, useFormPrefill } from "../packages/form/src/FormBuilder.jsx";
 export { Kanban } from "../packages/kanban/src/Kanban.jsx";
 export { KanbanCardActions } from "../packages/kanban/src/KanbanCardActions.jsx";
+export { Feed } from "../packages/feed/src/Feed.jsx";
 export {
   AutoTag,
   AutoStatusTag,
   AvatarStack,
+  CrmLookupSelect,
   DEFAULT_SVG_FONT_WEIGHT,
   HS_DATE_DIRECTION_LABELS,
   HS_DATE_PRESETS,
@@ -26,10 +28,33 @@ export {
   makeAvatarStackDataUri,
   makeStyledTextDataUri,
   SectionHeader,
+  Spinner,
+  SPINNERS,
+  SPINNER_NAMES,
+  gridToBraille,
+  makeGrid,
   StyledText,
 } from "./common-components/index.js";
 export {
+  buildCrmSearchConfig,
+  crmSearchResultToOption,
+  buildOptions,
+  findOptionLabel,
+  formatCurrency,
+  formatCurrencyCompact,
+  formatDate,
+  formatDateTime,
+  formatPercentage,
   getAutoTagVariant,
   getAutoStatusTagVariant,
   createStatusTagSortComparator,
+  CrmDataTable,
+  makeCrmSearchMultiSelectField,
+  makeCrmSearchSelectField,
+  normalizeCrmSearchRecord,
+  normalizeCrmSearchRows,
+  resolveCrmObjectType,
+  sumBy,
+  useCrmSearchDataSource,
+  useCrmSearchOptions,
 } from "./utils/index.js";

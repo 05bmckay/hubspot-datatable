@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { BuiltOption } from "./utils";
 import type {
   AutoTagOptions,
   AutoTagVariant,
@@ -99,6 +100,46 @@ export interface AvatarStackProps {
   alt?: string;
 }
 
+export interface CrmLookupSelectProps {
+  objectType: "contact" | "contacts" | "company" | "companies" | "deal" | "deals" | string;
+  properties?: string[];
+  name?: string;
+  label?: string;
+  value?: string | number | boolean | Array<string | number | boolean>;
+  onChange?: (value: string | number | boolean | Array<string | number | boolean>) => void;
+  multiple?: boolean;
+  placeholder?: string;
+  description?: string;
+  tooltip?: string;
+  required?: boolean;
+  readOnly?: boolean;
+  error?: boolean;
+  validationMessage?: string;
+  variant?: "transparent" | "input";
+  debounce?: number;
+  minSearchLength?: number;
+  pageLength?: number;
+  option?: {
+    label?: string | ((row: Record<string, unknown>) => unknown);
+    value?: string | ((row: Record<string, unknown>) => unknown);
+    description?: string | ((row: Record<string, unknown>) => unknown);
+    fallbackLabel?: string;
+    mapOption?: (row: Record<string, unknown>) => BuiltOption;
+  };
+  labelProperty?: string | ((row: Record<string, unknown>) => unknown);
+  valueProperty?: string | ((row: Record<string, unknown>) => unknown);
+  descriptionProperty?: string | ((row: Record<string, unknown>) => unknown);
+  selectedOptions?: BuiltOption | BuiltOption[];
+  format?: Record<string, unknown>;
+  row?: Record<string, unknown>;
+  baseConfig?: Record<string, unknown>;
+  query?: string;
+  onSearchChange?: (query: string) => void;
+  noResultsOption?: BuiltOption;
+  loadingOption?: BuiltOption;
+  selectProps?: Record<string, unknown>;
+}
+
 export interface StyledTextFormat {
   fontWeight?: "bold" | "demibold" | "regular" | number;
   italic?: boolean;
@@ -149,12 +190,57 @@ export interface StyledTextDataUriOptions extends Omit<StyledTextSharedProps, "c
 
 export interface StyledTextProps extends StyledTextSharedProps {}
 
+export type SpinnerName =
+  | "braille"
+  | "braillewave"
+  | "dna"
+  | "scan"
+  | "rain"
+  | "scanline"
+  | "pulse"
+  | "snake"
+  | "sparkle"
+  | "cascade"
+  | "columns"
+  | "orbit"
+  | "breathe"
+  | "waverows"
+  | "checkerboard"
+  | "helix"
+  | "fillsweep"
+  | "diagswipe";
+
+export interface SpinnerPreset {
+  frames: readonly string[];
+  interval: number;
+}
+
+export interface SpinnerProps {
+  name?: SpinnerName | string;
+  frames?: readonly string[];
+  interval?: number;
+  label?: ReactNode;
+  children?: ReactNode;
+  paused?: boolean;
+  gap?: string;
+  variant?: "bodytext" | "microcopy";
+  format?: StyledTextFormat;
+  inline?: boolean;
+  truncate?: boolean | { tooltipText?: string };
+}
+
 export declare function AutoTag(props: AutoTagProps): ReactNode;
 export declare function AutoStatusTag(props: AutoStatusTagProps): ReactNode;
 export declare function SectionHeader(props: SectionHeaderProps): ReactNode;
 export declare function KeyValueList(props: KeyValueListProps): ReactNode;
 export declare function AvatarStack(props: AvatarStackProps): ReactNode;
+export declare function CrmLookupSelect(props: CrmLookupSelectProps): ReactNode;
 export declare function StyledText(props: StyledTextProps): ReactNode;
+export declare function Spinner(props: SpinnerProps): ReactNode;
+export declare const SPINNERS: Record<SpinnerName, SpinnerPreset>;
+export declare const SPINNER_NAMES: SpinnerName[];
+export declare function gridToBraille(grid: boolean[][]): string;
+export declare function makeGrid(rows: number, cols: number): boolean[][];
 export declare function makeAvatarStackDataUri(
   items?: AvatarStackItem[] | null,
   options?: Omit<AvatarStackProps, "items" | "alt">
