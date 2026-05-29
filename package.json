@@ -1,6 +1,6 @@
 {
   "name": "hs-uix",
-  "version": "1.6.5",
+  "version": "2.0.0",
   "description": "Production-ready UI components for HubSpot UI Extensions — DataTable, FormBuilder, and more",
   "license": "MIT",
   "main": "./dist/index.js",
