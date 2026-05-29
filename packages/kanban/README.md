@@ -550,11 +550,11 @@ If your data comes from an API or you have too many records to load up-front, dr
 | `showSearch` | boolean | `true` (when `searchFields` set) | Show/hide the search input |
 | `searchFields` | string[] | `[]` | Fields to search across. Search UI only renders when non-empty. |
 | `searchPlaceholder` | string | `"Search..."` | Placeholder for the search input |
-| `searchDebounce` | number | `0` | Milliseconds to debounce `onSearchChange` callback |
+| `searchDebounce` | number | `250` | Milliseconds to debounce `onSearchChange` callback. Pass `0` for synchronous search |
 | `fuzzySearch` | boolean | `false` | Enable fuzzy matching via Fuse.js |
 | `fuzzyOptions` | object | — | Custom Fuse.js options (threshold, distance, keys) |
 | `filters` | `KanbanFilterConfig[]` | `[]` | Filter configurations (see below) |
-| `filterInlineLimit` | number | `2` | Max filters shown inline before overflow into a "Filters" button |
+| `filterInlineLimit` | number | `4` | Max filters shown inline before overflow into a "Filters" button |
 | `showFilterBadges` | boolean | `true` | Show active filter chips |
 | `showClearFiltersButton` | boolean | `showFilterBadges` | Show "Clear all" reset button. Defaults to the value of `showFilterBadges`, so hiding the chips hides the reset button too unless set explicitly |
 | `sortOptions` | `KanbanSortOption[]` | — | Sort options (single board-wide sort) |
@@ -562,7 +562,7 @@ If your data comes from an API or you have too many records to load up-front, dr
 | `sort` | string | — | Controlled sort option `value` |
 | `onSortChange` | `(value) => void` | — | Sort callback (controlled) |
 | `columnFooter` | `(rows, stage) => ReactNode` | — | Per-stage footer (aggregate row). Overridden by `stage.footer` when set. |
-| `columnWidth` | number | `280` | Min per-column width in px (AutoGrid `columnWidth`). Clamped to 280px. |
+| `columnWidth` | number | `350` | Min per-column width in px (AutoGrid `columnWidth`). Clamped to a 350px minimum. |
 | `collapsedStages` | string[] | — | Controlled list of collapsed stage values |
 | `onCollapsedStagesChange` | `(stages) => void` | — | Controlled-collapse callback |
 | `metrics` | `KanbanMetricItem[] \| ReactNode` | — | Headline metrics panel. Array → `<StatisticsItem>` shorthand; ReactNode → full custom render. |

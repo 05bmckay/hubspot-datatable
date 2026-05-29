@@ -943,7 +943,21 @@ Add/remove rows for dynamic lists:
   min: 1, max: 5 }
 ```
 
-Repeater sub-fields now validate on blur/onChange like top-level fields. Optional row reordering is available via `repeaterProps.reorderable` (with customizable move controls).
+Repeater sub-fields now validate on blur/onChange like top-level fields. Pass `repeaterProps` on the repeater field to customize the add/remove/reorder controls:
+
+| `repeaterProps` key | Type | Default | Description |
+|---|---|---|---|
+| `addLabel` | `string` | repeater add label | Text for the add-row control |
+| `removeLabel` | `string` | repeater remove label | Text for the per-row remove control |
+| `renderAdd` | `({ onClick, count }) => ReactNode` | — | Replace the default add control |
+| `renderRemove` | `({ index, onClick }) => ReactNode` | — | Replace the default per-row remove control |
+| `reorderable` | `boolean` | `false` | Enable up/down row reordering controls |
+| `moveUpLabel` | `string` | `"Up"` | Label for the move-up control |
+| `moveDownLabel` | `string` | `"Down"` | Label for the move-down control |
+| `renderMoveUp` | `({ index, disabled, onClick }) => ReactNode` | — | Replace the move-up control. `disabled` is `true` on the first row |
+| `renderMoveDown` | `({ index, disabled, onClick }) => ReactNode` | — | Replace the move-down control. `disabled` is `true` on the last row |
+
+When `reorderable` is set, both move controls always render so rows stay column-aligned — the first row's "up" and the last row's "down" come through disabled (and the `disabled` flag is passed to `renderMoveUp` / `renderMoveDown`).
 
 ## Field Groups (Structured)
 

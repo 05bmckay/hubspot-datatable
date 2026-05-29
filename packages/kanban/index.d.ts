@@ -303,14 +303,14 @@ export interface KanbanProps<Row = Record<string, unknown>, Id = string | number
   /** Search is only active, and the search input only renders, when this list is non-empty. */
   searchFields?: string[];
   searchPlaceholder?: string;
-  /** ms to debounce onSearchChange callback. 0 = no debounce. */
+  /** ms to debounce onSearchChange callback. Default 250; 0 = no debounce. */
   searchDebounce?: number;
   /** Enable fuzzy matching via Fuse.js */
   fuzzySearch?: boolean;
   /** Custom Fuse.js options (threshold, distance, keys, etc.) */
   fuzzyOptions?: Record<string, unknown>;
   filters?: KanbanFilterConfig<Row>[];
-  /** Number of filters shown inline before the "Filters" overflow button. Default 2. */
+  /** Number of filters shown inline before the "Filters" overflow button. Default 4. */
   filterInlineLimit?: number;
   /** Show active filter chips with individual clear affordances. Default true. */
   showFilterBadges?: boolean;
@@ -327,7 +327,7 @@ export interface KanbanProps<Row = Record<string, unknown>, Id = string | number
   /**
    * Pixel width for each column, passed to AutoGrid's columnWidth. Columns
    * share available horizontal space equally with this value as the minimum.
-   * Clamped to 280px minimum regardless of the value passed. Default 280px.
+   * Clamped to 350px minimum regardless of the value passed. Default 350px.
    */
   columnWidth?: number;
   collapsedStages?: string[];

@@ -89,6 +89,8 @@ Feed works out of the box with these item keys:
 | `type` | Activity type label, rendered in a `StatusTag` by default |
 | `typeLabel` | Optional display label when `type` is a machine value |
 | `typeVariant` | `StatusTag` variant: `default`, `info`, `success`, `warning`, `danger` |
+| `status` / `statusLabel` / `outcome` / `severity` | Optional secondary status text rendered in its own `StatusTag` (e.g. a call outcome or task severity). `statusLabel` wins when set, then `status`, `outcome`, `severity` |
+| `statusVariant` / `outcomeVariant` / `severityVariant` | `StatusTag` variant for that status text (`default`, `info`, `success`, `warning`, `danger`); defaults to `default` |
 | `iconName` / `icon` | Activity/entity icon. Use verified HubSpot icon names (`email`, `calling`, `appointment`, `comment`, `description`, etc.) |
 | `title` / `subject` | Main item heading |
 | `href` | Optional link wrapping the title |
@@ -209,7 +211,7 @@ Use `serverSide` when the parent/API owns filtering, sorting, searching, and pag
 ```
 
 - `container`: `"tile"` (default), `"none"`, or `"card"` (`card` is a Tile-backed alias)
-- `itemContainer`: `"none"` (default), `"tile"`, or `"card"` (`card` is a Tile-backed alias)
+- `itemContainer`: `"tile"` (default), `"none"`, or `"card"` (`card` is a Tile-backed alias)
 - `showDividers`: dividers between items when `itemContainer="none"`
 
 ## Render escape hatches

@@ -10,6 +10,7 @@ Pure helper functions for formatting, mapping, guards, and lightweight data tran
 - `collections.js` — tiny array helpers (`sumBy`)
 - `tagVariants.js` — map free-form status strings to semantic tag variants, plus sort comparators keyed by variant
 - `viewAdapters.js` — shape transforms between DataTable columns and Kanban cardFields (power a single "same data, different view" toggle)
+- `crmSearchAdapters.js` — CRM-bound data components (`CrmDataTable`, `CrmKanban`) plus the lower-level CRM search hooks and config builders behind them
 
 ## Purpose
 
@@ -43,6 +44,13 @@ import {
   createStatusTagSortComparator,
   // viewAdapters
   deriveCardFieldsFromColumns,
+  // crmSearchAdapters
+  CrmDataTable,
+  CrmKanban,
+  useCrmSearchDataSource,
+  useCrmSearchOptions,
+  makeCrmSearchSelectField,
+  makeCrmSearchMultiSelectField,
 } from "hs-uix/utils";
 ```
 
@@ -358,6 +366,86 @@ const CARD_FIELDS = deriveCardFieldsFromColumns(COLUMNS, {
 - **Adapt sort.** DataTable's per-column sort (click column header) and Kanban's board-wide `sortOptions` are different models — you still maintain a separate `sortOptions` array for Kanban.
 
 See also: [Kanban SPEC § cardFields](../../packages/kanban/SPEC.md#44-card-rendering--declarative-vs-render-prop).
+
+---
+
+## crmSearchAdapters.js
+
+CRM-bound data components and the search plumbing behind them. `CrmDataTable` and `CrmKanban` are the high-level entry points — point them at a CRM `objectType` + `properties` and you get a fully wired table or board with no manual data-source code.
+
+### Pagination model
+
+By default both components **fetch one batch (`pageLength`, default 100) and do search / sort / filter / pagination client-side** — a single request, no refetch per interaction, and pagination "just works" via in-memory slicing. When the result set exceeds the batch they show a "first N of M" note rather than silently showing a partial view. Pass **`serverSide`** to opt into cursor pagination for very large datasets (each search/filter/sort runs as a fresh server query). A built-in sort translator maps the active column/board sort to CRM `sorts` (honoring `propertyMap`) in server mode, so you don't hand-write a `sortMap`.
+
+> Note: these are JSX components that live in `utils` because they're CRM-data adapters; the underlying `useCrmSearch*` hooks live here too.
+
+### `CrmDataTable`
+
+A `DataTable` bound to CRM search. Accepts all `DataTable` props except the data-source ones it manages for you (`data`, `loading`, `error`, `searchValue`, `onParamsChange`).
+
+```jsx
+import { CrmDataTable } from "hs-uix/utils";
+
+<CrmDataTable
+  objectType="deal"
+  properties={["dealname", "amount", "dealstage", "closedate"]}
+  columns={[
+    { field: "dealname", label: "Deal", sortable: true },
+    { field: "amount", label: "Amount", renderCell: (v) => formatCurrency(v) },
+    { field: "dealstage", label: "Stage" },
+  ]}
+  searchFields={["dealname"]}
+  autoFilters={["dealstage"]}
+/>
+```
+
+### `CrmKanban`
+
+The board analog of `CrmDataTable`. `stages` is optional — pass it for real pipeline labels, or let stages auto-derive from the batch (labelled via `stageLabels`).
+
+```jsx
+import { CrmKanban } from "hs-uix/utils";
+
+<CrmKanban
+  objectType="deal"
+  properties={["dealname", "amount", "dealstage"]}
+  groupBy="dealstage"
+  stageLabels={{ appointmentscheduled: "Appointment", qualifiedtobuy: "Qualified" }}
+  cardFields={[
+    { field: "dealname", placement: "title" },
+    { field: "amount", placement: "meta", render: (v) => formatCurrency(v) },
+  ]}
+/>
+```
+
+### Shared props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `objectType` | string | — | CRM object to query (`"contact"`, `"company"`, `"deal"`, or any object type id/name). |
+| `properties` | `string[]` | — | CRM properties to fetch. |
+| `pageLength` | number | `100` | Batch size fetched per query. |
+| `serverSide` | boolean | `false` | Opt into cursor pagination for large datasets instead of the client-side batch model. |
+| `autoFilters` | `boolean \| string[] \| { fields? }` | — | Auto-generate select filters from properties (optionally capped by `autoFilterMaxOptions`). |
+| `propertyMap` | `Record<string,string>` | — | Map your field names to CRM property names (used for sorts/filters). |
+| `filterMap` / `sortMap` | fn | — | Advanced overrides for translating filters/sorts to CRM config. |
+| `searchFields` | `string[]` | — | Fields the search box queries. |
+| `mapRecord` | `(record) => Row` | — | Customize how a raw CRM record becomes a row. |
+| `dataTableProps` / `kanbanProps` | object | — | Escape hatch to pass anything straight through to the underlying `DataTable` / `Kanban`. |
+
+`CrmKanban` additionally takes `groupBy` (required), `stages` (optional), and `stageLabels`.
+
+### Lower-level building blocks
+
+If you need to drive a custom view, the hooks and helpers are exported directly:
+
+- `useCrmSearchDataSource(params, options)` — the hook both components use; returns `{ data, loading, error, totalCount, ... }` for a CRM search.
+- `useCrmSearchOptions(params, options)` — CRM search shaped into `{ label, value }` options for a `Select`.
+- `buildCrmSearchConfig(params, options)` — build the CRM search request config (appends a stable `hs_object_id` sort tiebreaker so cursor paging is deterministic).
+- `normalizeCrmSearchRecord` / `normalizeCrmSearchRows` — flatten raw CRM responses into plain rows.
+- `crmSearchResultToOption` — map a single CRM record into an option.
+- `makeCrmSearchSelectField` / `makeCrmSearchMultiSelectField` — build FormBuilder field configs backed by CRM search.
+- `resolveCrmObjectType` — normalize object-type aliases (`"contact"` ↔ `"contacts"`, etc.).
 
 ---
 

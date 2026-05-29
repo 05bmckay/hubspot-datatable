@@ -2,6 +2,8 @@
 
 Demo for wiring HubSpot's `useCrmSearch` hook into hs-uix components without making the components CRM-only.
 
+> **Most apps don't need this low-level wiring.** Reach for `CrmDataTable` / `CrmKanban` from `hs-uix/utils` — they point at an `objectType` + `properties`, fetch one batch, and paginate client-side by default (opt into `serverSide` for very large datasets). This demo deliberately shows the lower-level `useCrmSearch*` hooks for cases that need full control over the data source.
+
 ## Requirements
 
 - `@hubspot/ui-extensions >= 0.14.0`

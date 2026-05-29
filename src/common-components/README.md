@@ -7,13 +7,18 @@ Reusable UI wrappers built on top of HubSpot UI Extensions primitives.
 - `AutoStatusTag` — status tag whose variant is inferred from the value
 - `AutoTag` — generic tag with inferred variant + display text
 - `AvatarStack` — overlapping circular avatars (letters or image URLs)
+- `Icon` — superset of HubSpot's native `<Icon>`: custom glyphs, any CSS color, pixel sizes
+- `CrmLookupSelect` — CRM-backed `Select` / `MultiSelect` with live, debounced search
 - `SectionHeader` — title + optional description row
 - `KeyValueList` — vertical list of label/value rows
 - `StyledText` — SVG-rendered text with rotation, custom colors, pill backgrounds
+- `Spinner` — animated unicode/braille loading indicator
 
 Plus utilities + constants:
 
-- `makeAvatarStackDataUri`, `makeStyledTextDataUri` — low-level builders that return `{ src, width, height }` for composing into larger SVGs
+- `makeAvatarStackDataUri`, `makeStyledTextDataUri`, `makeIconDataUri` — low-level builders that return `{ src, width, height }` for composing into larger SVGs
+- `ICONS`, `ICON_NAMES`, `NATIVE_ICON_NAME_LIST`, `svgToIconEntry` — the custom icon registry and helpers behind `Icon`
+- `SPINNERS`, `SPINNER_NAMES` — spinner presets and registry
 - `HS_DATE_PRESETS`, `HS_DATE_DIRECTION_LABELS` — HubSpot's native quick-date preset list
 - `HS_FONT_FAMILY`, `HS_TEXT_COLOR`, `HS_SUBTLE_BG`, `HS_MUTED_TEXT`, `HS_NEUTRAL_CHIP` — style constants matching native HubSpot CSS
 
@@ -30,9 +35,12 @@ import {
   AutoStatusTag,
   AutoTag,
   AvatarStack,
+  Icon,
+  CrmLookupSelect,
   SectionHeader,
   KeyValueList,
   StyledText,
+  Spinner,
   HS_DATE_PRESETS,
 } from "hs-uix/common-components";
 ```
@@ -40,7 +48,7 @@ import {
 Or from the root package:
 
 ```js
-import { AvatarStack, StyledText } from "hs-uix";
+import { AvatarStack, Icon, StyledText } from "hs-uix";
 ```
 
 ---
@@ -96,6 +104,53 @@ const { src, width, height } = makeAvatarStackDataUri(items, { size: "sm", overl
 Returns `null` when `items` resolves to zero valid entries — callers can unconditionally render without guarding.
 
 **Image-URL caveat:** SVG `<image>` loads external assets via the browser's fetcher; the host must serve CORS-friendly headers. HubSpot-served avatars and most CDN hosts work; self-hosted images behind restricted CORS may not paint.
+
+---
+
+## Icon
+
+A drop-in superset of HubSpot's native `<Icon>`. The native component is great but boxed in three ways: a fixed `name` whitelist, only 4 colors (`inherit` / `alert` / `warning` / `success`), and only 3 sizes (`small` / `medium` / `large`). `Icon` lifts all three.
+
+When a request is **fully native-expressible** (a whitelisted `name`, a semantic `color`, and an `sm`/`md`/`lg` `size`) it **delegates to the real `<Icon>`** — so you keep native auto-sizing, real `color="inherit"`, and proper screen-reader semantics. Otherwise it falls back to rendering a registered SVG glyph as a data-URI `<Image>`, which is what unlocks custom glyphs, arbitrary colors, and pixel sizes.
+
+```jsx
+import { Icon } from "hs-uix/common-components";
+
+// Native-expressible → delegates to HubSpot's <Icon>
+<Icon name="email" size="md" color="inherit" />
+
+// Custom glyph + arbitrary color + pixel size → SVG fallback
+<Icon name="AdvancedFilters" color="#516f90" size={20} />
+
+// Semantic color on a custom glyph
+<Icon name="trophy" color="success" size="lg" screenReaderText="Top performer" />
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `name` | string | — | A registered glyph name — native (see `NATIVE_ICON_NAME_LIST`) or custom (see `ICON_NAMES`). An unknown, non-native name renders nothing. |
+| `color` | string | `"inherit"` | A semantic token (`inherit` / `alert` / `warning` / `success`) or **any CSS color** (e.g. `#516f90`). Non-semantic colors force the SVG fallback. |
+| `size` | t-shirt token \| number | `"md"` | `xs`/`extra-small` (12), `sm`/`small` (14), `md`/`medium` (16), `lg`/`large` (20), `xl`/`extra-large` (24), or a raw pixel number. Only `sm`/`md`/`lg` stay on the native path. |
+| `screenReaderText` | string | `name` | Accessible label. On the fallback path it becomes the `<Image alt>`. |
+
+### Custom glyphs & helpers
+
+`ICONS` is the bundled custom-glyph registry (~248 glyphs scraped from HubSpot's web app); `ICON_NAMES` are its keys and `NATIVE_ICON_NAME_LIST` is the native whitelist. To use a glyph the native component doesn't expose, add it to the registry — or build one from a copied `<svg>`:
+
+```js
+import { makeIconDataUri, svgToIconEntry } from "hs-uix/common-components";
+
+// Build a data URI directly (returns { src, width, height }, or null for an unknown name)
+const { src, width, height } = makeIconDataUri("AdvancedFilters", { size: 20, color: "#516f90" });
+
+// Turn a raw <svg> string into a registry entry (drops <mask>/<defs> and `currentColor`
+// fills so `color` can recolor it; keeps explicit fills / fill-rules for multi-color glyphs)
+const entry = svgToIconEntry('<svg viewBox="0 0 24 24"><path d="…" /></svg>');
+```
+
+**Fallback caveat:** a data-URI glyph can't inherit `currentColor`, so a fallback `Icon` won't auto-match surrounding text color — pass `color` explicitly. For multi-color glyphs, give individual paths their own `fill` in the registry entry; a single `color` prop only recolors paths that don't declare one.
 
 ---
 
@@ -168,6 +223,49 @@ const { src, width, height } = makeStyledTextDataUri("Sort", {
 Text rendered through `<Image>` as a data URI is **not user-selectable** — glyphs live inside a rasterized image boundary, not the DOM tree. If the text needs to be selectable/copyable, use the native `<Text>` component instead. `StyledText` is for cases where you need visual effects `<Text>` can't provide.
 
 For `background={{ preset: "tag" }}` specifically: plain horizontal tags now render through native HubSpot `Tag` so they match the platform exactly. The SVG path is still used when you rotate the tag or override the tag chrome.
+
+---
+
+## CrmLookupSelect
+
+A CRM-backed `Select` (or `MultiSelect` when `multiple`) that searches live as the user types. It wraps HubSpot's CRM search so you point it at an object type and properties and get a debounced, paginated lookup — no manual data-source wiring.
+
+![CrmLookupSelect live search](https://raw.githubusercontent.com/05bmckay/hs-uix/main/src/common-components/assets/crmLookUp.gif)
+
+A picked option stays valid after the live results change (the component remembers selected options internally), it shows `loadingOption` during the debounce window — not just the in-flight request — and only shows `noResultsOption` once a query has settled, so it never flashes "no results" while you're still typing.
+
+```jsx
+import { CrmLookupSelect } from "hs-uix/common-components";
+
+<CrmLookupSelect
+  objectType="contact"
+  properties={["firstname", "lastname", "email"]}
+  label="Primary contact"
+  value={contactId}
+  onChange={setContactId}
+  labelProperty={(r) => `${r.firstname} ${r.lastname}`}
+  valueProperty="hs_object_id"
+  descriptionProperty="email"
+/>
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `objectType` | string | — | CRM object to search (`"contact"`, `"company"`, `"deal"`, or any object type id/name). |
+| `properties` | `string[]` | — | Properties to fetch and search across. |
+| `value` / `onChange` | value \| `(value) => void` | — | Controlled selected value(s). |
+| `multiple` | boolean | `false` | Render a `MultiSelect` and allow multiple picks. |
+| `labelProperty` / `valueProperty` / `descriptionProperty` | string \| `(row) => unknown` | — | How to derive each option's label / value / description from a record. |
+| `option` | object | — | Advanced mapping: `{ label, value, description, fallbackLabel, mapOption }` for full control over option shape. |
+| `debounce` | number | — | Milliseconds to debounce the search query. |
+| `minSearchLength` | number | — | Minimum query length before searching. |
+| `pageLength` | number | — | Results fetched per query. |
+| `loadingOption` / `noResultsOption` | option | — | Placeholder options shown while debouncing/loading and after an empty settled query. |
+| `query` / `onSearchChange` | string \| `(q) => void` | — | Controlled search query. |
+| `variant` | `"transparent"` \| `"input"` | — | Visual variant passed to the underlying select. |
+| `placeholder`, `description`, `tooltip`, `required`, `readOnly`, `error`, `validationMessage` | — | — | Standard field props forwarded to the native select. |
 
 ---
 

@@ -15,11 +15,11 @@ npm install hs-uix
 import { DataTable } from "hs-uix/datatable";
 import { FormBuilder } from "hs-uix/form";
 import { Feed } from "hs-uix/feed";
-import { AutoStatusTag, AutoTag, KeyValueList, SectionHeader } from "hs-uix/common-components";
-import { formatCurrency, formatDate } from "hs-uix/utils";
+import { Icon, AutoStatusTag, AutoTag, CrmLookupSelect, KeyValueList, SectionHeader } from "hs-uix/common-components";
+import { CrmDataTable, CrmKanban, formatCurrency, formatDate } from "hs-uix/utils";
 
 // or import everything from the root
-import { DataTable, FormBuilder, AutoStatusTag, AutoTag } from "hs-uix";
+import { DataTable, FormBuilder, Icon, AutoStatusTag, AutoTag } from "hs-uix";
 ```
 
 Requires `react` >= 18.0.0 and `@hubspot/ui-extensions` >= 0.12.0 as peer dependencies (already present in any HubSpot UI Extensions project).
@@ -32,7 +32,8 @@ Requires `react` >= 18.0.0 and `@hubspot/ui-extensions` >= 0.12.0 as peer depend
 | **FormBuilder** | Declarative, config-driven form with validation, multi-step wizards, and 20+ field types | [Full documentation](https://github.com/05bmckay/hs-uix/blob/main/packages/form/README.md) |
 | **Kanban** | Stage-based board with filters, sort, headline metrics, card action bars, and DataTable-parity card field config | [Full documentation](https://github.com/05bmckay/hs-uix/blob/main/packages/kanban/README.md) |
 | **Feed** | Activity feed / timeline with a standard item shape, date grouping, load-more pagination, and HubSpot-native item regions | [Full documentation](https://github.com/05bmckay/hs-uix/blob/main/packages/feed/README.md) |
-| **Common Components** | Thin visual wrappers over HubSpot primitives — `AutoTag`, `AutoStatusTag`, `AvatarStack`, `SectionHeader`, `KeyValueList`, `StyledText` | [Full documentation](https://github.com/05bmckay/hs-uix/blob/main/src/common-components/README.md) |
+| **Common Components** | Thin visual wrappers over HubSpot primitives — `Icon`, `AutoTag`, `AutoStatusTag`, `AvatarStack`, `CrmLookupSelect`, `SectionHeader`, `KeyValueList`, `StyledText` | [Full documentation](https://github.com/05bmckay/hs-uix/blob/main/src/common-components/README.md) |
+| **CRM data** | `CrmDataTable` / `CrmKanban` — batch-fetching, client-side-paginating CRM table & board, plus the `useCrmSearch*` hooks behind them | [Full documentation](https://github.com/05bmckay/hs-uix/blob/main/src/utils/README.md) |
 | **Utils** | Pure helpers for formatting, options, HubSpot value guards, and tag-variant inference | [Full documentation](https://github.com/05bmckay/hs-uix/blob/main/src/utils/README.md) |
 
 ---
@@ -305,9 +306,11 @@ import { formatCurrency } from "hs-uix/utils";
 
 ## What's inside
 
+- `Icon` — a superset of HubSpot's native `<Icon>`: custom glyphs, any CSS color, and pixel sizes, delegating to the native component whenever the request is natively expressible
 - `AutoStatusTag` — `StatusTag` with variant inferred from the value (`Active` → success, `At risk` → warning, `Failed` → danger, etc.)
 - `AutoTag` — `Tag` with the same inference, for non-status labels
 - `AvatarStack` — overlapping circular avatars as a single SVG (letters, image URLs, or mixed); `+N` overflow chip past `maxVisible`
+- `CrmLookupSelect` — CRM-backed `Select` / `MultiSelect` with live, debounced search
 - `SectionHeader` — title + optional description + actions slot
 - `KeyValueList` — vertical list of label/value rows via `DescriptionList`
 - `StyledText` — SVG-rendered text with rotation, custom color, and pill backgrounds for cases native `<Text>` can't express
@@ -329,6 +332,16 @@ Pass a free-form status string and get a properly-colored tag back. Matching is 
 ![Avatar stack](https://raw.githubusercontent.com/05bmckay/hs-uix/main/src/common-components/assets/avatar-stack.png)
 
 Overlapping avatars rendered as a single SVG via `<Image>`. T-shirt sizing (`xs` → `xl`) or a raw pixel number. Letters auto-color from the built-in palette; image URLs get circular-clipped. Extras past `maxVisible` collapse into a neutral `+N` chip.
+
+### Icon
+
+A superset of HubSpot's native `<Icon>`. When the request is natively expressible (a whitelisted `name`, a semantic `color`, an `sm`/`md`/`lg` `size`) it **delegates to the real `<Icon>`** — keeping auto-sizing, `color="inherit"`, and screen-reader semantics. Otherwise it renders a registered SVG glyph as a data-URI `<Image>`, lifting all three native limits: custom/unregistered glyphs (~248 bundled in `ICONS`), any CSS color, and `xs`–`xl` tokens or a pixel size. Add your own glyphs via `svgToIconEntry`, or build a data URI directly with `makeIconDataUri`.
+
+### CrmLookupSelect
+
+![CrmLookupSelect live search](https://raw.githubusercontent.com/05bmckay/hs-uix/main/src/common-components/assets/crmLookUp.gif)
+
+Point it at a CRM `objectType` + `properties` and get a debounced, paginated `Select` / `MultiSelect` that searches live as the user types. Picked options stay valid after results change, `loadingOption` shows during the debounce window, and `noResultsOption` only appears once a query settles — no "no results" flash mid-type.
 
 ### SectionHeader & KeyValueList
 
